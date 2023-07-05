@@ -1,0 +1,43 @@
+version: "3.7"
+
+networks:
+  throttler-tanker-network:
+
+services:
+  throttler-tanker-dev-server:
+    image: throttler-tanker-dev-server
+    container_name: throttler-tanker-dev-container
+    build:
+      context: ../
+      dockerfile: ./build/golang/Dockerfile.dev
+    environment:
+      HTTP_HOST: "0.0.0.0"
+      HTTP_PORT: "8080"
+      DB_USER: "tanker"
+      DB_PASSWORD: "secret"
+      DB_HOST: "throttler-tanker-postgresql"
+      DB_NAME: "tanker_db"
+      DB_PORT: 5432
+    ports:
+      - "8080:8080"
+    networks:
+      - throttler-tanker-network
+    volumes:
+      - ../:/app
+    depends_on:
+      - throttler-tanker-postgresql
+
+  throttler-tanker-postgresql:
+    image: postgres:15.3
+    container_name: throttler-tanker-postgresql
+    restart: always
+    environment:
+      POSTGRES_USER: "tanker"
+      POSTGRES_PASSWORD: "secret"
+      POSTGRES_DB: "tanker_db"
+    volumes:
+      - ./postgresql/rules.sql:/docker-entrypoint-initdb.d/rules.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - throttler-tanker-network

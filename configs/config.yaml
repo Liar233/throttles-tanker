@@ -1,0 +1,21 @@
+http:
+  port: 80
+  host: 0.0.0.0
+  timeout: 1s
+storage:
+  host: throttler-tanker-postgresql
+  port: 5432
+  database: tanker_db
+  user: tanker
+  password: secret
+tanker:
+  network:
+    capacity: 10   # ip_tree ticks capacity
+    per_update: 1  # decrease ip_tree ticks per update
+  login:
+    capacity: 10
+    per_update: 1
+  password:
+    capacity: 10
+    per_update: 1
+update_timeout: 1s # ticker timeout

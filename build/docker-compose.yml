@@ -1,0 +1,40 @@
+version: "3.7"
+
+networks:
+  throttler-tanker-network:
+
+services:
+  throttler-tanker-server:
+    image: throttler-tanker-server
+    container_name: throttler-tanker-container
+    build:
+      context: ../
+      dockerfile: ./build/golang/Dockerfile
+    ports:
+      - "8080:80"
+    networks:
+      - throttler-tanker-network
+    depends_on:
+      throttler-tanker-postgresql:
+        condition: service_healthy
+
+  throttler-tanker-postgresql:
+    image: postgres:15.3
+    container_name: throttler-tanker-postgresql
+    restart: always
+    environment:
+      POSTGRES_USER: "tanker"
+      POSTGRES_PASSWORD: "secret"
+      POSTGRES_DB: "tanker_db"
+    volumes:
+      - ./postgresql/rules.sql:/docker-entrypoint-initdb.d/rules.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - throttler-tanker-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U tanker -d tanker_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
